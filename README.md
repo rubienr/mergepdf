@@ -18,4 +18,4 @@ Merges single sided PDF scans.
 + pdftk
 
 # Screenshot
-see: [https://github.com/rubienr/mergepdf](https://github.com/rubienr/mergepdf/docs/gui.jpg)
+see: [https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
