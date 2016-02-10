@@ -20,3 +20,4 @@ Merges single sided PDF scans.
 
 # Screenshot
 see: [https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
+see: [https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration](https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration)
