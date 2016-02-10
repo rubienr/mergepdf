@@ -16,6 +16,7 @@ Merges single sided PDF scans.
 + pypy-tk
 + python-tk
 + pdftk
++ tkdnd
 
 # Screenshot
 see: [https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
