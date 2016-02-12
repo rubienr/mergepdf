@@ -233,7 +233,8 @@ class MergePdfGui:
             print("status %s\noutput:\n%s" % (status, output))
             tkMessageBox.showinfo("Error", output)
         else:
-            subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True)
+            if self.doOpenResult:
+                subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True)
 
     def run(self):
         self.__initWindow()
