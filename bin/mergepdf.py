@@ -30,6 +30,9 @@ class MergePdfGui:
         self.isReverseDocumentB = False
         self.isReverseDocumentACheckboxValue = IntVar(False)
         self.isReverseDocumentA = False
+
+        self.doOpenResultCheckboxValue = IntVar(False)
+        self.doOpenResult = False
         
         self.openFileOptions = {}
         self.openFileOptions['defaultextension'] = '.pdf'
@@ -123,6 +126,17 @@ class MergePdfGui:
     def __setLastAccessedFolder(self, folder):
         self.shelve["folder"] = folder
 
+    # read state from shelve
+    def __getDoOpenResult(self):
+        if self.shelve.has_key("openResultAfterMerge"):
+            return self.shelve["openResultAfterMerge"]
+        else:
+            return False
+
+    # store state to shelve
+    def __setDoOpenResult(self, doOpenResult):
+        self.shelve["openResultAfterMerge"] = doOpenResult
+
     def __quit(self):
         self.shelve.close()
         quit()
@@ -170,8 +184,13 @@ class MergePdfGui:
         actionsGroup .pack(padx=10, pady=10,fill='x')
         actionBtn = Button(actionsGroup , text ="merge files", command = self.__shufflePdf)
         actionBtn.grid(row=0, column=0,sticky=W)
-        openDoc = Button(actionsGroup, text="view output", command=lambda : subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True))
-        openDoc.grid(row=0, column=1,sticky=W)
+        #openDoc = Button(actionsGroup, text="view output", command=lambda : subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True))
+        #openDoc.grid(row=0, column=1,sticky=W)
+        doOpenOutput = Checkbutton(actionsGroup, text="open merged result", variable=self.doOpenResultCheckboxValue, command=self.__doOpenResultCheckboxCallback)
+        doOpenOutput.grid(row=0, column=1, sticky=W)
+        if self.__getDoOpenResult():
+            doOpenOutput.select()
+
         actionLabel = Label(actionsGroup, text="applied command:")
         actionLabel.grid(row=1, column=0,sticky=W)
         self.actionEntry = Entry(actionsGroup , width = self.defaultTextfieldWidth)
@@ -180,6 +199,14 @@ class MergePdfGui:
 
         quitBtn = Button(self.rootWindow, text ="quit", command = self.__quit)
         quitBtn.pack()
+
+    def __doOpenResultCheckboxCallback(self):
+        value = False
+        if self.doOpenResultCheckboxValue.get():
+            value = True
+
+        self.__setDoOpenResult(value)
+        self.doOpenResult= value
 
     def __isReverseDocumentBCheckboxCallback(self):
         value = False
@@ -205,6 +232,8 @@ class MergePdfGui:
         if not status == 0:
             print("status %s\noutput:\n%s" % (status, output))
             tkMessageBox.showinfo("Error", output)
+        else:
+            subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True)
 
     def run(self):
         self.__initWindow()
