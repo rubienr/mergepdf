@@ -22,6 +22,7 @@ class MergePdfGui:
 
         self.homeDirectory = expanduser("~")
         self.rootWindow = Tk()
+        self.rootWindow.resizable(True, False)
         self.rootWindow.title("Quick and Dirty PDF merging")
         self.defaultTextfieldWidth = 72
 
@@ -129,7 +130,7 @@ class MergePdfGui:
     def __initWindow(self):
         docAGroup = LabelFrame(self.rootWindow, text="Document containing odd sheets", padx=5, pady=5)
         #docAGroup.grid(row=2, column=0, columnspan=2)
-        docAGroup.pack(padx=10, pady=10)
+        docAGroup.pack(padx=10, pady=10,fill='x')
 
         Button(docAGroup, text ="select document", command = self.__selectOddPages).grid(row=0, column=0,sticky=W)
         self.oddPdfEntry = Entry(docAGroup, width = self.defaultTextfieldWidth)
@@ -143,7 +144,7 @@ class MergePdfGui:
 
         docBGroup = LabelFrame(self.rootWindow, text="Document containing even sheets", padx=5, pady=5)
         #docBGroup.grid(row=2, column=0, columnspan=2)
-        docBGroup.pack(padx=10, pady=10)
+        docBGroup.pack(padx=10, pady=10,fill='x')
 
         Button(docBGroup, text ="select document", command = self.__selectEvenPages, justify=LEFT).grid(row=0, column=0,sticky=W)
         self.evenPdfEntry =  Entry(docBGroup, width = self.defaultTextfieldWidth)
