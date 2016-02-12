@@ -7,7 +7,8 @@ import tkMessageBox
 from os.path import expanduser
 from os import path
 from os import makedirs
-from os import system as sys
+import subprocess
+
 import shelve
 import commands
 
@@ -168,12 +169,14 @@ class MergePdfGui:
         actionsGroup .pack(padx=10, pady=10,fill='x')
         actionBtn = Button(actionsGroup , text ="merge files", command = self.__shufflePdf)
         actionBtn.grid(row=0, column=0,sticky=W)
+        openDoc = Button(actionsGroup, text="view output", command=lambda : subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True))
+        openDoc.grid(row=0, column=1,sticky=W)
         actionLabel = Label(actionsGroup, text="applied command:")
         actionLabel.grid(row=1, column=0,sticky=W)
         self.actionEntry = Entry(actionsGroup , width = self.defaultTextfieldWidth)
         self.actionEntry.configure(state='readonly')
         self.actionEntry.grid(row=1, column=1)
-        
+
         quitBtn = Button(self.rootWindow, text ="quit", command = self.__quit)
         quitBtn.pack()
 
