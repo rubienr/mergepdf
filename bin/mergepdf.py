@@ -27,14 +27,9 @@ class MergePdfGui:
         self.defaultTextfieldWidth = 72
 
         self.isReverseDocumentBCheckboxValue = IntVar(False)
-        self.isReverseDocumentB = False
         self.isReverseDocumentACheckboxValue = IntVar(False)
-        self.isReverseDocumentA = False
-
         self.operationModeRadioButtonValue = StringVar()
-
         self.doOpenResultCheckboxValue = IntVar(False)
-        self.doOpenResult = False
         
         self.openFileOptions = {}
         self.openFileOptions['defaultextension'] = '.pdf'
@@ -51,33 +46,34 @@ class MergePdfGui:
         self.openDirectoryOptions['parent'] = self.rootWindow
         self.openDirectoryOptions['title'] = '"Select output directory"'
 
-    def __selectEvenPages(self):
-        self.openFileOptions["initialdir"] = self.__getLastAccessedFolder()
+    def __onSelectEvenPagesCallback(self):
+        self.openFileOptions["initialdir"] = self.__lastAccessedFolder()
         self.openFileOptions['title'] = "Select even pages"
         f = tkFileDialog.askopenfile(mode='r', **self.openFileOptions)
         self.evenPdfEntry.delete(0, END)
         self.evenPdfEntry.insert(0, f.name)
-        self.__updateAction()
         self.__setLastAccessedFolder(path.dirname(f.name))
+        self.__updateAction()
         return f
 
-    def __selectOddPages(self):
-        self.openFileOptions["initialdir"] = self.__getLastAccessedFolder()
+    def __onSelectOddPagesCallback(self):
+        self.openFileOptions["initialdir"] = self.__lastAccessedFolder()
         self.openFileOptions['title'] = "Select odd pages"
         f = tkFileDialog.askopenfile(mode='r', **self.openFileOptions)
         self.oddPdfEntry.delete(0, END)
         self.oddPdfEntry.insert(0, f.name)
-        self.__updateAction()
         self.__setLastAccessedFolder(path.dirname(f.name))
+        self.__updateAction()
         return f
 
-    def __selectOutDirectory(self):
-        self.openDirectoryOptions["initialdir"] = self.__getLastAccessedFolder()
+    def __onSelectOutDirectoryCallback(self):
+        self.openDirectoryOptions["initialdir"] = self.__lastAccessedFolder()
         self.openDirectoryOptions['title'] = "Select output directory"
         f = tkFileDialog.askdirectory(**self.openDirectoryOptions)
         self.outPdfEntry.delete(0, END)
         self.outPdfEntry.insert(0, "%s/merged.pdf" % (f))
         self.__setLastAccessedFolder(f)
+        self.__updateAction()
         return f
 
     def __updateAction(self):
@@ -85,76 +81,77 @@ class MergePdfGui:
         self.actionEntry.delete(0, END)
 
         reversedArgumentA=""
-        if self.isReverseDocumentA:
+        if self.isReverseDocumentACheckboxValue.get():
             reversedArgumentA="end-1"
 
         reversedArgumentB=""
-        if self.isReverseDocumentB:
+        if self.isReverseDocumentBCheckboxValue.get():
             reversedArgumentB="end-1"
 
         self.actionEntry.insert(0, "pdftk A=%s B=%s %s A%s B%s output %s"
                                 %(self.oddPdfEntry.get(),
                                   self.evenPdfEntry.get(),
-                                  self.__getOperationMode(),
+                                  self.__operationMode(),
                                   reversedArgumentA,
                                   reversedArgumentB,
                                   self.outPdfEntry.get()))
         self.actionEntry.configure(state='readonly')
 
-    # read state from shelve
-    def __getIsReverseDocumentdA(self):
-        if self.shelve.has_key("reverseA"):
-            return self.shelve["reverseA"]
+    # read value from shelve
+    def __readValueFromStore(self, index, defaultValue):
+        if self.shelve.has_key(index):
+            return self.shelve[index]
         else:
-            return False
+            return defaultValue
 
-    # store state to shelve
-    def __setIsReverseDocumentA(self, isReverseDocumentA):
-        self.shelve["reverseA"] = isReverseDocumentA
+    # write value to shelve
+    def __writeValueToStore(self, index, value):
+        self.shelve[index] = value
 
-    # read state from shelve
-    def __getIsReverseDocumentdB(self):
-        if self.shelve.has_key("reverseB"):
-            return self.shelve["reverseB"]
-        else:
-            return False
+    def __isReverseDocumentdA(self):
+        return self.__readValueFromStore("reverseA", False)
 
-    # store state to shelve
-    def __setIsReverseDocumentB(self, isReverseDocumentB):
-        self.shelve["reverseB"] = isReverseDocumentB
+    def __isReverseDocumentdB(self):
+        return self.__readValueFromStore("reverseB", False)
 
-    # read state from shelve
-    def __getLastAccessedFolder(self):
-        if self.shelve.has_key("folder"):
-            return self.shelve["folder"]
-        else:
-            return "~"
+    def __lastAccessedFolder(self):
+        return self.__readValueFromStore("folder", "~")
 
-    # store state to shelve
     def __setLastAccessedFolder(self, folder):
-        self.shelve["folder"] = folder
+        self.__writeValueToStore("folder", folder)
 
     # read state from shelve
-    def __getDoOpenResult(self):
-        if self.shelve.has_key("openResultAfterMerge"):
-            return self.shelve["openResultAfterMerge"]
-        else:
-            return False
-
-    # store state to shelve
-    def __setDoOpenResult(self, doOpenResult):
-        self.shelve["openResultAfterMerge"] = doOpenResult
+    def __isOpenResultChecked(self):
+        return self.__readValueFromStore("openResultAfterMerge", False)
 
     # read state from shelve
-    def __getOperationMode(self):
-        if self.shelve.has_key("operationMode"):
-            return self.shelve["operationMode"]
-        else:
-            return "shuffle"
+    def __operationMode(self):
+            return self.__readValueFromStore("operationMode", "shuffle")
 
-    # store state to shelve
-    def __setOperationMode(self, operationMode):
-        self.shelve["operationMode"] = operationMode
+    def __onModeChangedCallback(self):
+         self.__writeValueToStore("operationMode", self.operationModeRadioButtonValue.get())
+         self.__updateAction()
+
+    def __onDoOpenResultCheckboxCallback(self):
+        value = False
+        if self.doOpenResultCheckboxValue.get():
+            value = True
+        self.__writeValueToStore("openResultAfterMerge", value)
+
+    def __onIsReverseDocumentBCheckboxCallback(self):
+        value = False
+        if self.isReverseDocumentBCheckboxValue.get():
+            value = True
+        self.__writeValueToStore("reverseB", value)
+        self.__updateAction()
+
+    def __onIsReverseDocumentACheckboxCallback(self):
+        value = False
+        if self.isReverseDocumentACheckboxValue.get():
+            value = True
+        self.__writeValueToStore("reverseA", value)
+        self.__updateAction()
+
 
     def __quit(self):
         self.shelve.close()
@@ -162,62 +159,63 @@ class MergePdfGui:
 
     def __initWindow(self):
         docAGroup = LabelFrame(self.rootWindow, text="Document containing odd sheets", padx=5, pady=5)
-        #docAGroup.grid(row=2, column=0, columnspan=2)
         docAGroup.pack(padx=10, pady=10,fill='x')
-
-        Button(docAGroup, text ="select document", command = self.__selectOddPages).grid(row=0, column=0,sticky=W)
+        Button(docAGroup, text ="select document", command = self.__onSelectOddPagesCallback).grid(row=0, column=0,sticky=W)
         self.oddPdfEntry = Entry(docAGroup, width = self.defaultTextfieldWidth)
         self.oddPdfEntry.grid(row=0, column=1,sticky=W)
 
-        isReversedeACheckBtn = Checkbutton(docAGroup, text="read document reversed", variable=self.isReverseDocumentACheckboxValue, command=self.__isReverseDocumentACheckboxCallback)
+        isReversedeACheckBtn = Checkbutton(docAGroup, text="read document reversed",
+                                           variable=self.isReverseDocumentACheckboxValue,
+                                           command=self.__onIsReverseDocumentACheckboxCallback)
         isReversedeACheckBtn.grid(row=1, column=0, sticky=W)
-        if self.__getIsReverseDocumentdA():
+        if self.__isReverseDocumentdA():
             isReversedeACheckBtn.select()
 
 
         docBGroup = LabelFrame(self.rootWindow, text="Document containing even sheets", padx=5, pady=5)
-        #docBGroup.grid(row=2, column=0, columnspan=2)
         docBGroup.pack(padx=10, pady=10,fill='x')
-
-        Button(docBGroup, text ="select document", command = self.__selectEvenPages, justify=LEFT).grid(row=0, column=0,sticky=W)
+        Button(docBGroup, text ="select document", command = self.__onSelectEvenPagesCallback, justify=LEFT).grid(row=0, column=0,sticky=W)
         self.evenPdfEntry =  Entry(docBGroup, width = self.defaultTextfieldWidth)
         self.evenPdfEntry.grid(row=0, column=1)
 
-        isReversedBCheckBtn = Checkbutton(docBGroup, text="read document reversed", variable=self.isReverseDocumentBCheckboxValue, command=self.__isReverseDocumentBCheckboxCallback)
+        isReversedBCheckBtn = Checkbutton(docBGroup, text="read document reversed",
+                                          variable=self.isReverseDocumentBCheckboxValue,
+                                          command=self.__onIsReverseDocumentBCheckboxCallback)
         isReversedBCheckBtn.grid(row=1, column=0)
-        if self.__getIsReverseDocumentdB():
+        if self.__isReverseDocumentdB():
             isReversedBCheckBtn.select()
 
 
         outDdocGroup = LabelFrame(self.rootWindow, text="Output", padx=5, pady=5)
-        #outDdocGroup.grid(row=2, column=0, columnspan=2)
         outDdocGroup.pack(padx=10, pady=10,fill='x')
-        Button(outDdocGroup, text ="select otput folder", command = self.__selectOutDirectory).grid(row=0, column=0, sticky=W)
+        Button(outDdocGroup, text ="select otput folder", command = self.__onSelectOutDirectoryCallback).grid(row=0, column=0, sticky=W)
         self.outPdfEntry =  Entry(outDdocGroup, width = self.defaultTextfieldWidth)
         self.outPdfEntry.grid(row=0, column=1)
-        self.outPdfEntry.insert(0, self.__getLastAccessedFolder() + "/merged.pdf")
+        self.outPdfEntry.insert(0, self.__lastAccessedFolder() + "/merged.pdf")
 
 
-        modeGroup = LabelFrame(self.rootWindow, text="Mode", padx=5, pady=5)
+        modeGroup = LabelFrame(self.rootWindow, text="Mode of operation", padx=5, pady=5)
         modeGroup.pack(padx=10, pady=10, fill="x")
-        modeRadio = Radiobutton(modeGroup, text="merge", variable=self.operationModeRadioButtonValue, value="shuffle", command=self.__modeChangedCallback)
-        modeRadio.grid(row=0, column=0, sticky=W)
-        modeRadio.config(state=NORMAL)
-        modeRadio.select()
-        modeRadio = Radiobutton(modeGroup, text="append", variable=self.operationModeRadioButtonValue, value="cat", command=self.__modeChangedCallback)
-        modeRadio.grid(row=1, column=0, sticky=W)
-        modeRadio.deselect()
+        modeRadioBtn = Radiobutton(modeGroup, text="merge page by page", variable=self.operationModeRadioButtonValue, value="shuffle",
+                                command=self.__onModeChangedCallback)
+        modeRadioBtn.grid(row=0, column=0, sticky=W)
+        if self.__operationMode() == "shuffle":
+            modeRadioBtn.select()
+        modeRadioBtn = Radiobutton(modeGroup, text="append 2nd document to 1st", variable=self.operationModeRadioButtonValue, value="cat",
+                                command=self.__onModeChangedCallback)
+        modeRadioBtn.grid(row=1, column=0, sticky=W)
+        if self.__operationMode() == "cat":
+            modeRadioBtn.select()
+
 
         actionsGroup = LabelFrame(self.rootWindow, text="Merge", padx=5, pady=5)
-        #actionsGroup .grid(row=2, column=0, columnspan=2)
         actionsGroup .pack(padx=10, pady=10,fill='x')
-        actionBtn = Button(actionsGroup , text ="merge files", command = self.__shufflePdf)
+        actionBtn = Button(actionsGroup , text ="merge files", command = self.__mergePdf)
         actionBtn.grid(row=0, column=0,sticky=W)
-        #openDoc = Button(actionsGroup, text="view output", command=lambda : subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True))
-        #openDoc.grid(row=0, column=1,sticky=W)
-        doOpenOutput = Checkbutton(actionsGroup, text="open merged result", variable=self.doOpenResultCheckboxValue, command=self.__doOpenResultCheckboxCallback)
+        doOpenOutput = Checkbutton(actionsGroup, text="open merged result", variable=self.doOpenResultCheckboxValue,
+                                   command=self.__onDoOpenResultCheckboxCallback)
         doOpenOutput.grid(row=0, column=1, sticky=W)
-        if self.__getDoOpenResult():
+        if self.__isOpenResultChecked():
             doOpenOutput.select()
 
 
@@ -227,48 +225,19 @@ class MergePdfGui:
         self.actionEntry.configure(state='readonly')
         self.actionEntry.grid(row=1, column=1)
 
+
         quitBtn = Button(self.rootWindow, text ="quit", command = self.__quit)
         quitBtn.pack()
 
-    def __modeChangedCallback(self):
-        self.__setOperationMode(self.operationModeRadioButtonValue.get())
-        self.__updateAction()
 
-
-    def __doOpenResultCheckboxCallback(self):
-        value = False
-        if self.doOpenResultCheckboxValue.get():
-            value = True
-
-        self.__setDoOpenResult(value)
-        self.doOpenResult= value
-
-    def __isReverseDocumentBCheckboxCallback(self):
-        value = False
-        if self.isReverseDocumentBCheckboxValue.get():
-            value = True
-
-        self.__setIsReverseDocumentB(value)
-        self.isReverseDocumentB = value
-        self.__updateAction()
-
-    def __isReverseDocumentACheckboxCallback(self):
-        value = False
-        if self.isReverseDocumentACheckboxValue.get():
-            value = True
-
-        self.__setIsReverseDocumentA(value)
-        self.isReverseDocumentA = value
-        self.__updateAction()
-
-    def __shufflePdf(self):
+    def __mergePdf(self):
         self.__updateAction()
         status, output = commands.getstatusoutput(self.actionEntry.get())
         if not status == 0:
             print("status %s\noutput:\n%s" % (status, output))
             tkMessageBox.showinfo("Error", output)
         else:
-            if self.__getDoOpenResult():
+            if self.__isOpenResultChecked():
                 subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True)
 
     def run(self):
