@@ -31,6 +31,8 @@ class MergePdfGui:
         self.isReverseDocumentACheckboxValue = IntVar(False)
         self.isReverseDocumentA = False
 
+        self.operationModeRadioButtonValue = StringVar()
+
         self.doOpenResultCheckboxValue = IntVar(False)
         self.doOpenResult = False
         
@@ -90,7 +92,13 @@ class MergePdfGui:
         if self.isReverseDocumentB:
             reversedArgumentB="end-1"
 
-        self.actionEntry.insert(0, "pdftk A=%s B=%s shuffle A%s B%s output %s" %(self.oddPdfEntry.get(), self.evenPdfEntry.get(), reversedArgumentA, reversedArgumentB, self.outPdfEntry.get()))
+        self.actionEntry.insert(0, "pdftk A=%s B=%s %s A%s B%s output %s"
+                                %(self.oddPdfEntry.get(),
+                                  self.evenPdfEntry.get(),
+                                  self.__getOperationMode(),
+                                  reversedArgumentA,
+                                  reversedArgumentB,
+                                  self.outPdfEntry.get()))
         self.actionEntry.configure(state='readonly')
 
     # read state from shelve
@@ -137,6 +145,17 @@ class MergePdfGui:
     def __setDoOpenResult(self, doOpenResult):
         self.shelve["openResultAfterMerge"] = doOpenResult
 
+    # read state from shelve
+    def __getOperationMode(self):
+        if self.shelve.has_key("operationMode"):
+            return self.shelve["operationMode"]
+        else:
+            return "shuffle"
+
+    # store state to shelve
+    def __setOperationMode(self, operationMode):
+        self.shelve["operationMode"] = operationMode
+
     def __quit(self):
         self.shelve.close()
         quit()
@@ -179,6 +198,16 @@ class MergePdfGui:
         self.outPdfEntry.insert(0, self.__getLastAccessedFolder() + "/merged.pdf")
 
 
+        modeGroup = LabelFrame(self.rootWindow, text="Mode", padx=5, pady=5)
+        modeGroup.pack(padx=10, pady=10, fill="x")
+        modeRadio = Radiobutton(modeGroup, text="merge", variable=self.operationModeRadioButtonValue, value="shuffle", command=self.__modeChangedCallback)
+        modeRadio.grid(row=0, column=0, sticky=W)
+        modeRadio.config(state=NORMAL)
+        modeRadio.select()
+        modeRadio = Radiobutton(modeGroup, text="append", variable=self.operationModeRadioButtonValue, value="cat", command=self.__modeChangedCallback)
+        modeRadio.grid(row=1, column=0, sticky=W)
+        modeRadio.deselect()
+
         actionsGroup = LabelFrame(self.rootWindow, text="Merge", padx=5, pady=5)
         #actionsGroup .grid(row=2, column=0, columnspan=2)
         actionsGroup .pack(padx=10, pady=10,fill='x')
@@ -191,6 +220,7 @@ class MergePdfGui:
         if self.__getDoOpenResult():
             doOpenOutput.select()
 
+
         actionLabel = Label(actionsGroup, text="applied command:")
         actionLabel.grid(row=1, column=0,sticky=W)
         self.actionEntry = Entry(actionsGroup , width = self.defaultTextfieldWidth)
@@ -199,6 +229,11 @@ class MergePdfGui:
 
         quitBtn = Button(self.rootWindow, text ="quit", command = self.__quit)
         quitBtn.pack()
+
+    def __modeChangedCallback(self):
+        self.__setOperationMode(self.operationModeRadioButtonValue.get())
+        self.__updateAction()
+
 
     def __doOpenResultCheckboxCallback(self):
         value = False
@@ -233,7 +268,7 @@ class MergePdfGui:
             print("status %s\noutput:\n%s" % (status, output))
             tkMessageBox.showinfo("Error", output)
         else:
-            if self.doOpenResult:
+            if self.__getDoOpenResult():
                 subprocess.call("xdg-open " + self.outPdfEntry.get(), shell=True)
 
     def run(self):
