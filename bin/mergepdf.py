@@ -22,10 +22,12 @@ class MergePdfGui:
         self.homeDirectory = expanduser("~")
         self.rootWindow = Tk()
         self.rootWindow.title("Quick and Dirty PDF merging")
-        self.defaultTextfieldWidth = 100
+        self.defaultTextfieldWidth = 72
 
         self.isReverseDocumentBCheckboxValue = IntVar(False)
         self.isReverseDocumentB = False
+        self.isReverseDocumentACheckboxValue = IntVar(False)
+        self.isReverseDocumentA = False
         
         self.openFileOptions = {}
         self.openFileOptions['defaultextension'] = '.pdf'
@@ -74,23 +76,37 @@ class MergePdfGui:
     def __updateAction(self):
         self.actionEntry.configure(state='normal')
         self.actionEntry.delete(0, END)
-        #self.actionEntry.insert(0, "pdftk A=%s B=%s shuffle A B output %s" %(self.oddPdfEntry.get(), self.evenPdfEntry.get(), self.outPdfEntry.get()))
 
-        reversedArgument=""
+        reversedArgumentA=""
+        if self.isReverseDocumentA:
+            reversedArgumentA="end-1"
+
+        reversedArgumentB=""
         if self.isReverseDocumentB:
-            reversedArgument="end-1"
+            reversedArgumentB="end-1"
 
-        self.actionEntry.insert(0, "pdftk A=%s B=%s shuffle A B%s output %s" %(self.oddPdfEntry.get(), self.evenPdfEntry.get(), reversedArgument, self.outPdfEntry.get()))
+        self.actionEntry.insert(0, "pdftk A=%s B=%s shuffle A%s B%s output %s" %(self.oddPdfEntry.get(), self.evenPdfEntry.get(), reversedArgumentA, reversedArgumentB, self.outPdfEntry.get()))
         self.actionEntry.configure(state='readonly')
 
+    # read state from shelve
+    def __getIsReverseDocumentdA(self):
+        if self.shelve.has_key("reverseA"):
+            return self.shelve["reverseA"]
+        else:
+            return False
+
     # store state to shelve
+    def __setIsReverseDocumentA(self, isReverseDocumentA):
+        self.shelve["reverseA"] = isReverseDocumentA
+
+    # read state from shelve
     def __getIsReverseDocumentdB(self):
         if self.shelve.has_key("reverseB"):
             return self.shelve["reverseB"]
         else:
             return False
 
-    # read state from shelve
+    # store state to shelve
     def __setIsReverseDocumentB(self, isReverseDocumentB):
         self.shelve["reverseB"] = isReverseDocumentB
 
@@ -110,52 +126,74 @@ class MergePdfGui:
         quit()
 
     def __initWindow(self):
-        oddPdfBtn = Button(self.rootWindow, text ="select odd sheets", command = self.__selectOddPages)
-        oddPdfBtn.pack()
-        oddPdfLabel = Label(self.rootWindow, text="Odd file:")
-        oddPdfLabel.pack()
-        self.oddPdfEntry =  Entry(self.rootWindow, width = self.defaultTextfieldWidth)
-        self.oddPdfEntry.pack()
-        
-        evenPdfBtn = Button(self.rootWindow, text ="select even sheets", command = self.__selectEvenPages, justify=LEFT)
-        evenPdfBtn.pack()
-        evenPdfLabel = Label(self.rootWindow, text="Even file:")
-        evenPdfLabel.pack()
-        self.evenPdfEntry =  Entry(self.rootWindow, width = self.defaultTextfieldWidth)
-        self.evenPdfEntry.pack()
-        
-        outDirBtn = Button(self.rootWindow, text ="select otput folder", command = self.__selectOutDirectory)
-        outDirBtn.pack()
-        outDirLabel = Label(self.rootWindow, text="Merged output *.pdf:")
-        outDirLabel.pack()
-        self.outPdfEntry =  Entry(self.rootWindow, width = self.defaultTextfieldWidth)
-        self.outPdfEntry.pack()
+        docAGroup = LabelFrame(self.rootWindow, text="Document containing odd sheets", padx=5, pady=5)
+        #docAGroup.grid(row=2, column=0, columnspan=2)
+        docAGroup.pack(padx=10, pady=10)
+
+        Button(docAGroup, text ="select document", command = self.__selectOddPages).grid(row=0, column=0,sticky=W)
+        self.oddPdfEntry = Entry(docAGroup, width = self.defaultTextfieldWidth)
+        self.oddPdfEntry.grid(row=0, column=1,sticky=W)
+
+        isReversedeACheckBtn = Checkbutton(docAGroup, text="read document reversed", variable=self.isReverseDocumentACheckboxValue, command=self.__isReverseDocumentACheckboxCallback)
+        isReversedeACheckBtn.grid(row=1, column=0, sticky=W)
+        if self.__getIsReverseDocumentdA():
+            isReversedeACheckBtn.select()
+
+
+        docBGroup = LabelFrame(self.rootWindow, text="Document containing even sheets", padx=5, pady=5)
+        #docBGroup.grid(row=2, column=0, columnspan=2)
+        docBGroup.pack(padx=10, pady=10)
+
+        Button(docBGroup, text ="select document", command = self.__selectEvenPages, justify=LEFT).grid(row=0, column=0,sticky=W)
+        self.evenPdfEntry =  Entry(docBGroup, width = self.defaultTextfieldWidth)
+        self.evenPdfEntry.grid(row=0, column=1)
+
+        isReversedBCheckBtn = Checkbutton(docBGroup, text="read document reversed", variable=self.isReverseDocumentBCheckboxValue, command=self.__isReverseDocumentBCheckboxCallback)
+        isReversedBCheckBtn.grid(row=1, column=0)
+        if self.__getIsReverseDocumentdB():
+            isReversedBCheckBtn.select()
+
+
+        outDdocGroup = LabelFrame(self.rootWindow, text="Output", padx=5, pady=5)
+        #outDdocGroup.grid(row=2, column=0, columnspan=2)
+        outDdocGroup.pack(padx=10, pady=10,fill='x')
+        Button(outDdocGroup, text ="select otput folder", command = self.__selectOutDirectory).grid(row=0, column=0, sticky=W)
+        self.outPdfEntry =  Entry(outDdocGroup, width = self.defaultTextfieldWidth)
+        self.outPdfEntry.grid(row=0, column=1)
         self.outPdfEntry.insert(0, self.__getLastAccessedFolder() + "/merged.pdf")
 
-        checkBtn = Checkbutton(self.rootWindow, text="Reverse even pages document", variable=self.isReverseDocumentBCheckboxValue, command=self.__isReverseDocumentBCheckboxCallback)
-        if self.__getIsReverseDocumentdB():
-            checkBtn.select()
-        checkBtn.pack()
 
-        actionBtn = Button(self.rootWindow, text ="merge files", command = self.__shufflePdf)
-        actionBtn.pack()
-        actionLabel = Label(self.rootWindow, text="Applied command:")
-        actionLabel.pack()
-
-        self.actionEntry = Entry(self.rootWindow, width = self.defaultTextfieldWidth)
+        actionsGroup = LabelFrame(self.rootWindow, text="Merge", padx=5, pady=5)
+        #actionsGroup .grid(row=2, column=0, columnspan=2)
+        actionsGroup .pack(padx=10, pady=10,fill='x')
+        actionBtn = Button(actionsGroup , text ="merge files", command = self.__shufflePdf)
+        actionBtn.grid(row=0, column=0,sticky=W)
+        actionLabel = Label(actionsGroup, text="applied command:")
+        actionLabel.grid(row=1, column=0,sticky=W)
+        self.actionEntry = Entry(actionsGroup , width = self.defaultTextfieldWidth)
         self.actionEntry.configure(state='readonly')
-        self.actionEntry.pack()
+        self.actionEntry.grid(row=1, column=1)
         
         quitBtn = Button(self.rootWindow, text ="quit", command = self.__quit)
         quitBtn.pack()
 
     def __isReverseDocumentBCheckboxCallback(self):
+        value = False
         if self.isReverseDocumentBCheckboxValue.get():
-            self.__setIsReverseDocumentB(True)
-            self.isReverseDocumentB = True
-        else:
-            self.__setIsReverseDocumentB(False)
-            self.isReverseDocumentB = False
+            value = True
+
+        self.__setIsReverseDocumentB(value)
+        self.isReverseDocumentB = value
+        self.__updateAction()
+
+    def __isReverseDocumentACheckboxCallback(self):
+        value = False
+        if self.isReverseDocumentACheckboxValue.get():
+            value = True
+
+        self.__setIsReverseDocumentA(value)
+        self.isReverseDocumentA = value
+        self.__updateAction()
 
     def __shufflePdf(self):
         self.__updateAction()
