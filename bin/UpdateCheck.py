@@ -3,7 +3,7 @@
 #
 from os import path
 from os import chdir
-import commands
+import subprocess
 
 class UpdateCheck:
     def __init__(self):
@@ -12,15 +12,16 @@ class UpdateCheck:
 
     def checkIfUpdateAvailable(self):
         chdir(self.basedir)
-        status, output = commands.getstatusoutput("git remote update")
-        if status == 0:
-            status, output = commands.getstatusoutput("git status -uno")
-            if status == 0:
-                if "branch is up-to-date" in output:
-                    return (0, False)
-                else:
-                    return (0, True)
-        return (1, False)
+
+        try:
+            subprocess.check_output(["git","remote update"], shell=True) # timeout=10
+            output = subprocess.check_output(["git", "status -uno"], shell=True) # timeout=1
+            if "branch is up-to-date" in output:
+                return (0, False)
+            else:
+                return (0, True)
+        except subprocess.CalledProcessError as e:
+            return (1, False)
 
 
 if __name__ == "__main__":

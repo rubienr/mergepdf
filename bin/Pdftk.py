@@ -1,7 +1,7 @@
 #
 # @author rubienr 2/2016
 #
-import commands
+import subprocess
 
 class Pdftk:
     def __init__(self):
@@ -14,12 +14,14 @@ class Pdftk:
         return self.outputDocument
 
     def invoke(self):
-        status, output = commands.getstatusoutput(self.getCommandString())
-        if status == 0:
+        try:
+            output = subprocess.check_output([self.binary, self.__getCommandArguments()], shell=True)
             self.lastMessage = ""
-        else:
-            self.lastMessage = output
-        return status
+            return 0
+        except subprocess.CalledProcessError as e:
+            self.lastMessage = e.output
+            print("error: " + e.output)
+            return 1
 
     def getLastMessage(self):
         return self.lastMessage
@@ -33,13 +35,14 @@ class Pdftk:
         self.documentBOrder = self.documentOrder[documentBOrder]
         self.operationMode = self.operationModes[operationMode]
 
-
-    def getCommandString(self):
-        return "%s A=%s B=%s %s A%s B%s output %s" % (
-            self.binary,
+    def __getCommandArguments(self):
+        return "A=%s B=%s %s A%s B%s output %s" % (
             self.documentA,
             self.documentB,
             self.operationMode,
             self.documentAOrder,
             self.documentBOrder,
             self.outputDocument)
+
+    def getCommandString(self):
+        return self.binary + " " + self.__getCommandArguments()
