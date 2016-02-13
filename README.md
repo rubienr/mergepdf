@@ -13,7 +13,7 @@ Start GUI:
     cd mergepdf
     bin/mergepdf.sh
 ```
-[Merge](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
+[Merge:](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
 <ol>
 <li>select document containing odd files</li>
 <li>select document containing even files</li>
