@@ -11,9 +11,10 @@ from os import path
 from os import makedirs
 import subprocess
 import shelve
-import commands
 from Pdftk import Pdftk
-
+from UpdateCheck import UpdateCheck
+from threading import Thread
+import time
 
 class MergePdfGui:
     def __init__(self):
@@ -161,7 +162,7 @@ class MergePdfGui:
         self.__updateDocumentIllustration()
 
     def __updateDocumentIllustration(self):
-        if self.operationModeRadioButtonValue.get() == "concatenate":
+        if self.operationModeRadioButtonValue.get() == "merge":
             if self.isReverseDocumentACheckboxValue.get():
                 self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[4])
                 self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[2])
@@ -341,19 +342,45 @@ class MergePdfGui:
         self.__addActionGroup()
         quitBtn = Button(self.rootWindow, text="quit", command=self.__quit)
         quitBtn.pack()
+        self.__addStatusBar()
+        self.__updateDocumentIllustration()
 
     def __mergePdf(self):
+        self.__writeToStatusBar("processing ...")
         self.__updateAction()
-        #status, output = commands.getstatusoutput(self.actionEntry.get())
         if not self.pdftk.invoke() == 0:
             tkMessageBox.showinfo("Error", self.pdftk.getLastMessage())
         else:
             if self.__isOpenResultChecked():
                 subprocess.call("xdg-open " + self.pdftk.getOutputDocumentPath(), shell=True)
+        self.__writeToStatusBar()
+
+    def __checkForUpdate(self):
+        status, isUpdateAvailable = UpdateCheck().checkIfUpdateAvailable()
+        if status == 0:
+            if isUpdateAvailable:
+                self.updateAvailable = True
+                self.__writeToStatusBar()
+
+    def __writeToStatusBar(self, text=""):
+        format = "%s - %s"
+        if text == "":
+            format = "%s%s"
+        updateInfo = ""
+        if self.updateAvailable:
+            updateInfo = "a newer version is available"
+        self.statusBar.config(text=format % (text, updateInfo))
+        self.statusBar.update_idletasks()
+
+    def __addStatusBar(self):
+        Label(self.rootWindow, pady=2).pack(fill=X)
+        self.statusBar = Label(self.rootWindow, text="", bd=1, relief=SUNKEN, anchor=W)
+        self.statusBar.pack(side=BOTTOM, fill=X)
 
     def run(self):
         self.__initWindow()
         self.rootWindow.protocol("WM_DELETE_WINDOW", self.__quit)
+        Thread(target=self.__checkForUpdate).start()
         self.rootWindow.mainloop()
 
 
