@@ -1,3 +1,6 @@
+#
+# @author rubienr 2/2016
+#
 from os import path
 from os import chdir
 import commands
@@ -18,6 +21,7 @@ class UpdateCheck:
                 else:
                     return (0, True)
         return (1, False)
+
 
 if __name__ == "__main__":
     uc = UpdateCheck()

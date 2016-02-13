@@ -16,6 +16,7 @@ from UpdateCheck import UpdateCheck
 from threading import Thread
 import time
 
+
 class MergePdfGui:
     def __init__(self):
         self.shelveDirectory = path.dirname(__file__)
@@ -99,8 +100,10 @@ class MergePdfGui:
         if self.isReverseDocumentBCheckboxValue.get():
             reversedArgumentB = "reversed"
 
-        self.pdftk.update(documentA=self.oddPdfEntry.get(), documentB=self.evenPdfEntry.get(), documentAOrder=reversedArgumentA,
-                          documentBOrder=reversedArgumentB, outputDocument=self.outPdfEntry.get(), operationMode=self.__operationMode())
+        self.pdftk.update(documentA=self.oddPdfEntry.get(), documentB=self.evenPdfEntry.get(),
+                          documentAOrder=reversedArgumentA,
+                          documentBOrder=reversedArgumentB, outputDocument=self.outPdfEntry.get(),
+                          operationMode=self.__operationMode())
         self.actionEntry.insert(0, self.pdftk.getCommandString())
         self.actionEntry.configure(state='readonly')
 
@@ -165,38 +168,38 @@ class MergePdfGui:
     def __updateDocumentIllustration(self):
         if self.operationModeRadioButtonValue.get() == "merge":
             if self.isReverseDocumentACheckboxValue.get():
-                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[4])
-                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[2])
-                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[0])
+                self.documentSides["A1"].grid(column=self.documentSidesGridColumnIndex[4])
+                self.documentSides["A2"].grid(column=self.documentSidesGridColumnIndex[2])
+                self.documentSides["A3"].grid(column=self.documentSidesGridColumnIndex[0])
             else:
-                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[0])
-                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[2])
-                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[4])
+                self.documentSides["A1"].grid(column=self.documentSidesGridColumnIndex[0])
+                self.documentSides["A2"].grid(column=self.documentSidesGridColumnIndex[2])
+                self.documentSides["A3"].grid(column=self.documentSidesGridColumnIndex[4])
             if self.isReverseDocumentBCheckboxValue.get():
-                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[5])
-                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[3])
-                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[1])
+                self.documentSides["B1"].grid(column=self.documentSidesGridColumnIndex[5])
+                self.documentSides["B2"].grid(column=self.documentSidesGridColumnIndex[3])
+                self.documentSides["B3"].grid(column=self.documentSidesGridColumnIndex[1])
             else:
-                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[1])
-                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[3])
-                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[5])
-        else: # concatenate
+                self.documentSides["B1"].grid(column=self.documentSidesGridColumnIndex[1])
+                self.documentSides["B2"].grid(column=self.documentSidesGridColumnIndex[3])
+                self.documentSides["B3"].grid(column=self.documentSidesGridColumnIndex[5])
+        else:  # concatenate
             if self.isReverseDocumentACheckboxValue.get():
-                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[2])
-                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[1])
-                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[0])
+                self.documentSides["A1"].grid(column=self.documentSidesGridColumnIndex[2])
+                self.documentSides["A2"].grid(column=self.documentSidesGridColumnIndex[1])
+                self.documentSides["A3"].grid(column=self.documentSidesGridColumnIndex[0])
             else:
-                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[0])
-                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[1])
-                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[2])
+                self.documentSides["A1"].grid(column=self.documentSidesGridColumnIndex[0])
+                self.documentSides["A2"].grid(column=self.documentSidesGridColumnIndex[1])
+                self.documentSides["A3"].grid(column=self.documentSidesGridColumnIndex[2])
             if self.isReverseDocumentBCheckboxValue.get():
-                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[5])
-                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[4])
-                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[3])
+                self.documentSides["B1"].grid(column=self.documentSidesGridColumnIndex[5])
+                self.documentSides["B2"].grid(column=self.documentSidesGridColumnIndex[4])
+                self.documentSides["B3"].grid(column=self.documentSidesGridColumnIndex[3])
             else:
-                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[3])
-                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[4])
-                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[5])
+                self.documentSides["B1"].grid(column=self.documentSidesGridColumnIndex[3])
+                self.documentSides["B2"].grid(column=self.documentSidesGridColumnIndex[4])
+                self.documentSides["B3"].grid(column=self.documentSidesGridColumnIndex[5])
 
     def __quit(self):
         self.shelve.close()
@@ -281,10 +284,10 @@ class MergePdfGui:
         group.pack(padx=10, pady=10, fill=X)
         self.garbage = dict()
 
-        Label(group, text="    ").grid(row=0, column=0,sticky=W)
-        Label(group, text="input:").grid(row=0, column=1,sticky=W)
-        Label(group, text="    ").grid(row=0, column=5,sticky=W)
-        Label(group, text="ouput:").grid(row=0, column=6,sticky=W, columnspan=20)
+        Label(group, text="    ").grid(row=0, column=0, sticky=W)
+        Label(group, text="input:").grid(row=0, column=1, sticky=W)
+        Label(group, text="    ").grid(row=0, column=5, sticky=W)
+        Label(group, text="ouput:").grid(row=0, column=6, sticky=W, columnspan=20)
 
         img = PhotoImage(file=self.shelveDirectory + "/icons/documentA.png")
         Label(group, image=img).grid(row=1, column=1, sticky=W)
@@ -294,8 +297,7 @@ class MergePdfGui:
         Label(group, image=img).grid(row=1, column=2, sticky=W)
         self.garbage[img] = img
 
-
-        self.documentSidesGridColumnIndex = {0:6, 1:7, 2:8, 3:9, 4:10, 5:11}
+        self.documentSidesGridColumnIndex = {0: 6, 1: 7, 2: 8, 3: 9, 4: 10, 5: 11}
         self.documentSides = dict()
 
         img = PhotoImage(file=self.shelveDirectory + "/icons/a1.png")
@@ -333,7 +335,6 @@ class MergePdfGui:
         l.grid(row=1, column=11, sticky=W)
         self.documentSides["B3"] = l
         self.garbage[img] = img
-
 
     def __initWindow(self):
         self.__addSelectDocumentGroups()

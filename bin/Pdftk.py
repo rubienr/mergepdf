@@ -1,5 +1,6 @@
-
-import subprocess
+#
+# @author rubienr 2/2016
+#
 import commands
 
 class Pdftk:
