@@ -1,5 +1,7 @@
 #!/usr/bin/python
-
+#
+# @author rubienr 2/2016
+#
 from Tkinter import *
 from Tkinter import IntVar
 import tkFileDialog
@@ -8,9 +10,9 @@ from os.path import expanduser
 from os import path
 from os import makedirs
 import subprocess
-
 import shelve
 import commands
+
 
 class MergePdfGui:
     def __init__(self):
@@ -30,7 +32,7 @@ class MergePdfGui:
         self.isReverseDocumentACheckboxValue = IntVar(False)
         self.operationModeRadioButtonValue = StringVar()
         self.doOpenResultCheckboxValue = IntVar(False)
-        
+
         self.openFileOptions = {}
         self.openFileOptions['defaultextension'] = '.pdf'
         self.openFileOptions['filetypes'] = [('PDF', '.pdf')]
@@ -45,6 +47,7 @@ class MergePdfGui:
         self.openDirectoryOptions['mustexist'] = 'true'
         self.openDirectoryOptions['parent'] = self.rootWindow
         self.openDirectoryOptions['title'] = '"Select output directory"'
+        self.run()
 
     def __onSelectEvenPagesCallback(self):
         self.openFileOptions["initialdir"] = self.__lastAccessedFolder()
@@ -80,21 +83,21 @@ class MergePdfGui:
         self.actionEntry.configure(state='normal')
         self.actionEntry.delete(0, END)
 
-        reversedArgumentA=""
+        reversedArgumentA = ""
         if self.isReverseDocumentACheckboxValue.get():
-            reversedArgumentA="end-1"
+            reversedArgumentA = "end-1"
 
-        reversedArgumentB=""
+        reversedArgumentB = ""
         if self.isReverseDocumentBCheckboxValue.get():
-            reversedArgumentB="end-1"
+            reversedArgumentB = "end-1"
 
         self.actionEntry.insert(0, "pdftk A=%s B=%s %s A%s B%s output %s"
-                                %(self.oddPdfEntry.get(),
-                                  self.evenPdfEntry.get(),
-                                  self.__operationMode(),
-                                  reversedArgumentA,
-                                  reversedArgumentB,
-                                  self.outPdfEntry.get()))
+                                % (self.oddPdfEntry.get(),
+                                   self.evenPdfEntry.get(),
+                                   self.__operationMode(),
+                                   reversedArgumentA,
+                                   reversedArgumentB,
+                                   self.outPdfEntry.get()))
         self.actionEntry.configure(state='readonly')
 
     # read value from shelve
@@ -126,11 +129,12 @@ class MergePdfGui:
 
     # read state from shelve
     def __operationMode(self):
-            return self.__readValueFromStore("operationMode", "shuffle")
+        return self.__readValueFromStore("operationMode", "shuffle")
 
     def __onModeChangedCallback(self):
-         self.__writeValueToStore("operationMode", self.operationModeRadioButtonValue.get())
-         self.__updateAction()
+        self.__writeValueToStore("operationMode", self.operationModeRadioButtonValue.get())
+        self.__updateAction()
+        self.__updateDocumentIllustration()
 
     def __onDoOpenResultCheckboxCallback(self):
         value = False
@@ -144,6 +148,7 @@ class MergePdfGui:
             value = True
         self.__writeValueToStore("reverseB", value)
         self.__updateAction()
+        self.__updateDocumentIllustration()
 
     def __onIsReverseDocumentACheckboxCallback(self):
         value = False
@@ -151,18 +156,55 @@ class MergePdfGui:
             value = True
         self.__writeValueToStore("reverseA", value)
         self.__updateAction()
+        self.__updateDocumentIllustration()
 
+    def __updateDocumentIllustration(self):
+        if self.operationModeRadioButtonValue.get() == "shuffle":
+            if self.isReverseDocumentACheckboxValue.get():
+                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[4])
+                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[2])
+                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[0])
+            else:
+                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[0])
+                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[2])
+                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[4])
+            if self.isReverseDocumentBCheckboxValue.get():
+                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[5])
+                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[3])
+                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[1])
+            else:
+                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[1])
+                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[3])
+                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[5])
+        else: # concatenate
+            if self.isReverseDocumentACheckboxValue.get():
+                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[2])
+                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[1])
+                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[0])
+            else:
+                self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[0])
+                self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[1])
+                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[2])
+            if self.isReverseDocumentBCheckboxValue.get():
+                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[5])
+                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[4])
+                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[3])
+            else:
+                self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[3])
+                self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[4])
+                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[5])
 
     def __quit(self):
         self.shelve.close()
         quit()
 
-    def __initWindow(self):
+    def __addSelectDocumentGroups(self):
         docAGroup = LabelFrame(self.rootWindow, text="Document containing odd sheets", padx=5, pady=5)
-        docAGroup.pack(padx=10, pady=10,fill='x')
-        Button(docAGroup, text ="select document", command = self.__onSelectOddPagesCallback).grid(row=0, column=0,sticky=W)
-        self.oddPdfEntry = Entry(docAGroup, width = self.defaultTextfieldWidth)
-        self.oddPdfEntry.grid(row=0, column=1,sticky=W)
+        docAGroup.pack(padx=10, pady=10, fill='x')
+        Button(docAGroup, text="select document", command=self.__onSelectOddPagesCallback).grid(row=0, column=0,
+                                                                                                sticky=W)
+        self.oddPdfEntry = Entry(docAGroup, width=self.defaultTextfieldWidth)
+        self.oddPdfEntry.grid(row=0, column=1, sticky=W)
 
         isReversedeACheckBtn = Checkbutton(docAGroup, text="read document reversed",
                                            variable=self.isReverseDocumentACheckboxValue,
@@ -171,11 +213,12 @@ class MergePdfGui:
         if self.__isReverseDocumentdA():
             isReversedeACheckBtn.select()
 
-
         docBGroup = LabelFrame(self.rootWindow, text="Document containing even sheets", padx=5, pady=5)
-        docBGroup.pack(padx=10, pady=10,fill='x')
-        Button(docBGroup, text ="select document", command = self.__onSelectEvenPagesCallback, justify=LEFT).grid(row=0, column=0,sticky=W)
-        self.evenPdfEntry =  Entry(docBGroup, width = self.defaultTextfieldWidth)
+        docBGroup.pack(padx=10, pady=10, fill='x')
+        Button(docBGroup, text="select document", command=self.__onSelectEvenPagesCallback, justify=LEFT).grid(row=0,
+                                                                                                               column=0,
+                                                                                                               sticky=W)
+        self.evenPdfEntry = Entry(docBGroup, width=self.defaultTextfieldWidth)
         self.evenPdfEntry.grid(row=0, column=1)
 
         isReversedBCheckBtn = Checkbutton(docBGroup, text="read document reversed",
@@ -185,50 +228,109 @@ class MergePdfGui:
         if self.__isReverseDocumentdB():
             isReversedBCheckBtn.select()
 
+    def __addSelectOutputDocumentGroup(self):
 
         outDdocGroup = LabelFrame(self.rootWindow, text="Output", padx=5, pady=5)
-        outDdocGroup.pack(padx=10, pady=10,fill='x')
-        Button(outDdocGroup, text ="select otput folder", command = self.__onSelectOutDirectoryCallback).grid(row=0, column=0, sticky=W)
-        self.outPdfEntry =  Entry(outDdocGroup, width = self.defaultTextfieldWidth)
+        outDdocGroup.pack(padx=10, pady=10, fill='x')
+        Button(outDdocGroup, text="select otput folder", command=self.__onSelectOutDirectoryCallback).grid(row=0,
+                                                                                                           column=0,
+                                                                                                           sticky=W)
+        self.outPdfEntry = Entry(outDdocGroup, width=self.defaultTextfieldWidth)
         self.outPdfEntry.grid(row=0, column=1)
         self.outPdfEntry.insert(0, self.__lastAccessedFolder() + "/merged.pdf")
 
-
+    def __addSelectModeGroup(self):
         modeGroup = LabelFrame(self.rootWindow, text="Mode of operation", padx=5, pady=5)
         modeGroup.pack(padx=10, pady=10, fill="x")
-        modeRadioBtn = Radiobutton(modeGroup, text="merge page by page", variable=self.operationModeRadioButtonValue, value="shuffle",
-                                command=self.__onModeChangedCallback)
+        modeRadioBtn = Radiobutton(modeGroup, text="merge page by page", variable=self.operationModeRadioButtonValue,
+                                   value="shuffle",
+                                   command=self.__onModeChangedCallback)
         modeRadioBtn.grid(row=0, column=0, sticky=W)
         if self.__operationMode() == "shuffle":
             modeRadioBtn.select()
-        modeRadioBtn = Radiobutton(modeGroup, text="append 2nd document to 1st", variable=self.operationModeRadioButtonValue, value="cat",
-                                command=self.__onModeChangedCallback)
+        modeRadioBtn = Radiobutton(modeGroup, text="append 2nd document to 1st",
+                                   variable=self.operationModeRadioButtonValue, value="cat",
+                                   command=self.__onModeChangedCallback)
         modeRadioBtn.grid(row=1, column=0, sticky=W)
         if self.__operationMode() == "cat":
             modeRadioBtn.select()
 
+    def __addActionGroup(self):
 
         actionsGroup = LabelFrame(self.rootWindow, text="Merge", padx=5, pady=5)
-        actionsGroup .pack(padx=10, pady=10,fill='x')
-        actionBtn = Button(actionsGroup , text ="merge files", command = self.__mergePdf)
-        actionBtn.grid(row=0, column=0,sticky=W)
+        actionsGroup.pack(padx=10, pady=10, fill='x')
+        actionBtn = Button(actionsGroup, text="merge files", command=self.__mergePdf)
+        actionBtn.grid(row=0, column=0, sticky=W)
         doOpenOutput = Checkbutton(actionsGroup, text="open merged result", variable=self.doOpenResultCheckboxValue,
                                    command=self.__onDoOpenResultCheckboxCallback)
         doOpenOutput.grid(row=0, column=1, sticky=W)
         if self.__isOpenResultChecked():
             doOpenOutput.select()
 
-
         actionLabel = Label(actionsGroup, text="applied command:")
-        actionLabel.grid(row=1, column=0,sticky=W)
-        self.actionEntry = Entry(actionsGroup , width = self.defaultTextfieldWidth)
+        actionLabel.grid(row=1, column=0, sticky=W)
+        self.actionEntry = Entry(actionsGroup, width=self.defaultTextfieldWidth)
         self.actionEntry.configure(state='readonly')
         self.actionEntry.grid(row=1, column=1)
 
+    def __addIllustrateResultGroup(self):
+        group = LabelFrame(self.rootWindow, text="Result illustration")
+        group.pack(padx=10, pady=10, fill=X)
 
-        quitBtn = Button(self.rootWindow, text ="quit", command = self.__quit)
+        Label(group, text="input documents:").grid(row=0, column=0,sticky=W)
+        docA = LabelFrame(group)
+        docA.grid(row=0, column=1, sticky=W)
+        Label(docA, text=" A ").grid(row=0, column=0, sticky=W)
+
+        docB = LabelFrame(group)
+        docB.grid(row=0, column=2, sticky=W)
+        Label(docB, text=" B ").grid(row=0, column=0, sticky=W)
+
+        Label(group, text="ouput page order:").grid(row=1, column=0,sticky=W)
+
+        self.documentSidesGridColumnIndex = {0:1, 1:2, 2:3, 3:4, 4:5, 5:6}
+        self.documentSides = dict()
+
+        pageView = LabelFrame(group)
+        self.documentSides["A1"] = pageView
+        Label(pageView, text="A1").grid(row=0,column=0)
+        pageView.grid(row=1,column=1,sticky=W)
+
+        pageView = LabelFrame(group)
+        self.documentSides["A2"] = pageView
+        Label(pageView, text="A2").grid(row=0,column=0)
+        pageView.grid(row=1,column=2,sticky=W)
+
+        pageView = LabelFrame(group)
+        self.documentSides["An"] = pageView
+        Label(pageView, text="An").grid(row=0,column=0)
+        pageView.grid(row=1,column=3,sticky=W)
+
+        pageView = LabelFrame(group)
+        self.documentSides["B1"] = pageView
+        Label(pageView, text="B1").grid(row=0,column=0)
+        pageView.grid(row=1,column=4,sticky=W)
+
+        pageView = LabelFrame(group)
+        self.documentSides["B2"] = pageView
+        Label(pageView, text="B2").grid(row=0,column=0)
+        pageView.grid(row=1,column=5,sticky=W)
+
+        pageView = LabelFrame(group)
+        self.documentSides["Bn"] = pageView
+        Label(pageView, text="Bn").grid(row=0,column=0)
+        pageView.grid(row=1,column=6,sticky=W)
+
+
+
+    def __initWindow(self):
+        self.__addSelectDocumentGroups()
+        self.__addSelectOutputDocumentGroup()
+        self.__addSelectModeGroup()
+        self.__addIllustrateResultGroup()
+        self.__addActionGroup()
+        quitBtn = Button(self.rootWindow, text="quit", command=self.__quit)
         quitBtn.pack()
-
 
     def __mergePdf(self):
         self.__updateAction()
@@ -245,6 +347,6 @@ class MergePdfGui:
         self.rootWindow.protocol("WM_DELETE_WINDOW", self.__quit)
         self.rootWindow.mainloop()
 
+
 if __name__ == '__main__':
     taskPreparationGui = MergePdfGui()
-    taskPreparationGui.run()
