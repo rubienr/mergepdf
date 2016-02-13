@@ -163,43 +163,43 @@ class MergePdfGui:
             if self.isReverseDocumentACheckboxValue.get():
                 self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[4])
                 self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[2])
-                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[0])
+                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[0])
             else:
                 self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[0])
                 self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[2])
-                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[4])
+                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[4])
             if self.isReverseDocumentBCheckboxValue.get():
                 self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[5])
                 self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[3])
-                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[1])
+                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[1])
             else:
                 self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[1])
                 self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[3])
-                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[5])
+                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[5])
         else: # concatenate
             if self.isReverseDocumentACheckboxValue.get():
                 self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[2])
                 self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[1])
-                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[0])
+                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[0])
             else:
                 self.documentSides["A1"].grid(column = self.documentSidesGridColumnIndex[0])
                 self.documentSides["A2"].grid(column = self.documentSidesGridColumnIndex[1])
-                self.documentSides["An"].grid(column = self.documentSidesGridColumnIndex[2])
+                self.documentSides["A3"].grid(column = self.documentSidesGridColumnIndex[2])
             if self.isReverseDocumentBCheckboxValue.get():
                 self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[5])
                 self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[4])
-                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[3])
+                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[3])
             else:
                 self.documentSides["B1"].grid(column = self.documentSidesGridColumnIndex[3])
                 self.documentSides["B2"].grid(column = self.documentSidesGridColumnIndex[4])
-                self.documentSides["Bn"].grid(column = self.documentSidesGridColumnIndex[5])
+                self.documentSides["B3"].grid(column = self.documentSidesGridColumnIndex[5])
 
     def __quit(self):
         self.shelve.close()
         quit()
 
     def __addSelectDocumentGroups(self):
-        docAGroup = LabelFrame(self.rootWindow, text="Document containing odd sheets", padx=5, pady=5)
+        docAGroup = LabelFrame(self.rootWindow, text="Document containing odd sheets (A)", padx=5, pady=5)
         docAGroup.pack(padx=10, pady=10, fill='x')
         Button(docAGroup, text="select document", command=self.__onSelectOddPagesCallback).grid(row=0, column=0,
                                                                                                 sticky=W)
@@ -213,7 +213,7 @@ class MergePdfGui:
         if self.__isReverseDocumentdA():
             isReversedeACheckBtn.select()
 
-        docBGroup = LabelFrame(self.rootWindow, text="Document containing even sheets", padx=5, pady=5)
+        docBGroup = LabelFrame(self.rootWindow, text="Document containing even sheets (B)", padx=5, pady=5)
         docBGroup.pack(padx=10, pady=10, fill='x')
         Button(docBGroup, text="select document", command=self.__onSelectEvenPagesCallback, justify=LEFT).grid(row=0,
                                                                                                                column=0,
@@ -276,51 +276,62 @@ class MergePdfGui:
     def __addIllustrateResultGroup(self):
         group = LabelFrame(self.rootWindow, text="Result illustration")
         group.pack(padx=10, pady=10, fill=X)
+        self.garbage = dict()
 
-        Label(group, text="input documents:").grid(row=0, column=0,sticky=W)
-        docA = LabelFrame(group)
-        docA.grid(row=0, column=1, sticky=W)
-        Label(docA, text=" A ").grid(row=0, column=0, sticky=W)
+        #innerGroup1 = Frame(group)
+        #innerGroup1.grid(row=0, column=0,columnspan=20, sticky=W)
+        Label(group, text="    ").grid(row=0, column=0,sticky=W)
+        Label(group, text="input:").grid(row=0, column=1,sticky=W)
+        Label(group, text="    ccc").grid(row=0, column=5,sticky=W)
+        Label(group, text="ouput:").grid(row=0, column=6,sticky=W, columnspan=20)
 
-        docB = LabelFrame(group)
-        docB.grid(row=0, column=2, sticky=W)
-        Label(docB, text=" B ").grid(row=0, column=0, sticky=W)
+        img = PhotoImage(file=self.shelveDirectory + "/icons/documentA.png")
+        Label(group, image=img).grid(row=1, column=1, sticky=W)
+        self.garbage[img] = img
 
-        Label(group, text="ouput page order:").grid(row=1, column=0,sticky=W)
+        img = PhotoImage(file=self.shelveDirectory + "/icons/documentB.png")
+        Label(group, image=img).grid(row=1, column=2, sticky=W)
+        self.garbage[img] = img
 
-        self.documentSidesGridColumnIndex = {0:1, 1:2, 2:3, 3:4, 4:5, 5:6}
+
+        self.documentSidesGridColumnIndex = {0:6, 1:7, 2:8, 3:9, 4:10, 5:11}
         self.documentSides = dict()
 
-        pageView = LabelFrame(group)
-        self.documentSides["A1"] = pageView
-        Label(pageView, text="A1").grid(row=0,column=0)
-        pageView.grid(row=1,column=1,sticky=W)
+        img = PhotoImage(file=self.shelveDirectory + "/icons/a1.png")
+        l = Label(group, image=img)
+        l.grid(row=1, column=6, sticky=W)
+        self.documentSides["A1"] = l
+        self.garbage[img] = img
 
-        pageView = LabelFrame(group)
-        self.documentSides["A2"] = pageView
-        Label(pageView, text="A2").grid(row=0,column=0)
-        pageView.grid(row=1,column=2,sticky=W)
+        img = PhotoImage(file=self.shelveDirectory + "/icons/a2.png")
+        l = Label(group, image=img)
+        l.grid(row=1, column=7, sticky=W)
+        self.documentSides["A2"] = l
+        self.garbage[img] = img
 
-        pageView = LabelFrame(group)
-        self.documentSides["An"] = pageView
-        Label(pageView, text="An").grid(row=0,column=0)
-        pageView.grid(row=1,column=3,sticky=W)
+        img = PhotoImage(file=self.shelveDirectory + "/icons/a3.png")
+        l = Label(group, image=img)
+        l.grid(row=1, column=8, sticky=W)
+        self.documentSides["A3"] = l
+        self.garbage[img] = img
 
-        pageView = LabelFrame(group)
-        self.documentSides["B1"] = pageView
-        Label(pageView, text="B1").grid(row=0,column=0)
-        pageView.grid(row=1,column=4,sticky=W)
+        img = PhotoImage(file=self.shelveDirectory + "/icons/b1.png")
+        l = Label(group, image=img)
+        l.grid(row=1, column=9, sticky=W)
+        self.documentSides["B1"] = l
+        self.garbage[img] = img
 
-        pageView = LabelFrame(group)
-        self.documentSides["B2"] = pageView
-        Label(pageView, text="B2").grid(row=0,column=0)
-        pageView.grid(row=1,column=5,sticky=W)
+        img = PhotoImage(file=self.shelveDirectory + "/icons/b2.png")
+        l = Label(group, image=img)
+        l.grid(row=1, column=10, sticky=W)
+        self.documentSides["B2"] = l
+        self.garbage[img] = img
 
-        pageView = LabelFrame(group)
-        self.documentSides["Bn"] = pageView
-        Label(pageView, text="Bn").grid(row=0,column=0)
-        pageView.grid(row=1,column=6,sticky=W)
-
+        img = PhotoImage(file=self.shelveDirectory + "/icons/b3.png")
+        l = Label(group, image=img)
+        l.grid(row=1, column=11, sticky=W)
+        self.documentSides["B3"] = l
+        self.garbage[img] = img
 
 
     def __initWindow(self):
