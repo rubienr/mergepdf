@@ -32,4 +32,5 @@ Ubuntu:
 ```
 # Screenshots
 see: [https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
+
 see: [https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration.svg](https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration.svg)
