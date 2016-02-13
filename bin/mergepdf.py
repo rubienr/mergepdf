@@ -51,6 +51,7 @@ class MergePdfGui:
         self.openDirectoryOptions['title'] = '"Select output directory"'
 
         self.pdftk = Pdftk()
+        self.updateAvailable = False
         self.run()
 
     def __onSelectEvenPagesCallback(self):
@@ -364,7 +365,7 @@ class MergePdfGui:
 
     def __writeToStatusBar(self, text=""):
         format = "%s - %s"
-        if text == "":
+        if text == "" or not self.updateAvailable:
             format = "%s%s"
         updateInfo = ""
         if self.updateAvailable:
