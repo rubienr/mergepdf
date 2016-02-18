@@ -12,10 +12,9 @@ class UpdateCheck:
 
     def checkIfUpdateAvailable(self):
         chdir(self.basedir)
-
         try:
-            subprocess.check_output(["git","remote update"], shell=True) # timeout=10
-            output = subprocess.check_output(["git", "status -uno"], shell=True) # timeout=1
+            output = subprocess.check_output(["git remote update"], shell=True) # timeout=10
+            output = subprocess.check_output(["git status -uno"], shell=True) # timeout=1
             if "branch is up-to-date" in output:
                 return (0, False)
             else:
