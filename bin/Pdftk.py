@@ -15,9 +15,7 @@ class Pdftk:
 
     def invoke(self):
         try:
-            #print("merging: \"%s\"" %(self.__getCommandArguments()))
             output = subprocess.check_output([self.binary + " " + self.__getCommandArguments()], shell=True)
-            #print("output: %s" %(output))
             self.lastMessage = ""
             return 0
         except subprocess.CalledProcessError as e:
