@@ -14,8 +14,6 @@ import shelve
 from Pdftk import Pdftk
 from UpdateCheck import UpdateCheck
 from threading import Thread
-import time
-
 
 class MergePdfGui:
     def __init__(self):
