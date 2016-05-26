@@ -33,7 +33,7 @@ Ubuntu:
 # Screenshots
 
 ![gui](https://raw.githubusercontent.com/rubienr/mergepdf/master/docs/gui.jpg)
-![merge process illustration](https://raw.githubusercontent.com/rubienr/mergepdf/master/docs/merge-illustration.svg)
+![merge process illustration](https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration.svg)
 
 see: [https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
 
