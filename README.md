@@ -3,6 +3,8 @@ Quick and dirty PDF merging GUI. Merges single sided scans. Usefull if your scan
 + merge side by side or
 + append document
 
+![merge process illustration](https://rawgithub.com/rubienr/mergepdf/master/docs/merge-illustration.svg)
+
 # Usage
 Clone repository:
 ```
@@ -33,9 +35,3 @@ Ubuntu:
 # Screenshots
 
 ![gui](https://raw.githubusercontent.com/rubienr/mergepdf/master/docs/gui.jpg)
-![merge process illustration](https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration.svg)
-
-see: [https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg](https://github.com/rubienr/mergepdf/blob/master/docs/gui.jpg)
-
-see: [https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration.svg](https://github.com/rubienr/mergepdf/blob/master/docs/merge-illustration.svg)
-
